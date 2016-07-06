@@ -13,9 +13,8 @@ namespace ConsoleApplication3
 {
     class Program
     {
-        public static AForge.Vision.Motion.IMotionDetector detector = null;
-        public static AForge.Vision.Motion.IMotionProcessing processor = null;
         public static AForge.Vision.Motion.MotionDetector motionDetector = null;
+        public static AForge.Vision.Motion.BlobCountingObjectsProcessing processor = null;
 
         static void Main(string[] args)
         {
@@ -28,32 +27,36 @@ namespace ConsoleApplication3
 
             Rectangle[] zones = new Rectangle[1];
             zones[0] = new Rectangle(490, 250, 395, 470);
-            detector.MotionZones = zones;
-
+            detector.MotionZones = zones;           
 
             for (int i = 0; i < 120; i++)
             {
                 Bitmap videoFrame = reader.ReadVideoFrame();
                 float current = 0;
 
+                // Process Frame
                 GaussianBlur blur = new GaussianBlur(3, 3);
                 blur.ApplyInPlace(videoFrame);
-
                 current = detector.ProcessFrame(videoFrame);
+
                 Graphics g = Graphics.FromImage(videoFrame);
-                Pen blackPen = new Pen(Color.Black, 3);
-                g.DrawRectangle(blackPen, zones[0]);
+                if (processor.ObjectsCount > 0)
+                {
+                    DrawMotion(g, processor.ObjectRectangles);
+                }
+
                 videoFrame.Save(@"C:\Development\PluralsightAforgeAudition\Output\" + i.ToString("D5") + ".png");
                 videoFrame.Dispose();
 
             }
+
             reader.Close();
 
         }
 
         public static AForge.Vision.Motion.MotionDetector GetDefaultMotionDetector()
         {
-            detector = new AForge.Vision.Motion.TwoFramesDifferenceDetector()
+            var detector = new AForge.Vision.Motion.TwoFramesDifferenceDetector()
             {
                 DifferenceThreshold = 4,
                 SuppressNoise = true
@@ -62,7 +65,7 @@ namespace ConsoleApplication3
 
             processor = new AForge.Vision.Motion.BlobCountingObjectsProcessing()
             {
-                HighlightColor = System.Drawing.Color.LightYellow,
+                HighlightColor = System.Drawing.Color.LightSeaGreen,
                 HighlightMotionRegions = true,
                 MinObjectsHeight = 7,
                 MinObjectsWidth = 7,
@@ -71,5 +74,18 @@ namespace ConsoleApplication3
             motionDetector = new AForge.Vision.Motion.MotionDetector(detector, processor);
             return (motionDetector);
         }
+
+        public static void DrawMotion(Graphics g, Rectangle[] motionZones)
+        {
+            Pen greenPen = new Pen(Color.LightGreen, 3);
+
+            foreach (var rect in motionZones)
+            {
+                g.DrawRectangle(greenPen, rect);
+                //g.FillEllipse(greenPen.Brush, rect);
+            }
+        }
+
+
     }
 }
