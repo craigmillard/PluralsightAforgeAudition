@@ -45,7 +45,7 @@ namespace ConsoleApplication3
                     DrawMotion(g, processor.ObjectRectangles);
                 }
 
-                videoFrame.Save(@"C:\Development\PluralsightAforgeAudition\Output\" + i.ToString("D5") + ".png");
+                videoFrame.Save(@"C:\Development\PluralsightAforgeAudition\video\" + i.ToString("D5") + ".png");
                 videoFrame.Dispose();
 
             }
