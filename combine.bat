@@ -1,1 +1,1 @@
-ffmpeg -framerate 30 -i "video\%%5d.png" -vf fps=30 MotionDetected.mp4
+ffmpeg -framerate 30 -i "video\%%5d.png" -vf fps=30 -pix_fmt yuv420p MotionDetected.mp4

@@ -15,6 +15,7 @@ namespace ConsoleApplication3
     {
         public static AForge.Vision.Motion.MotionDetector motionDetector = null;
         public static AForge.Vision.Motion.BlobCountingObjectsProcessing processor = null;
+        public static List<Rectangle> motionDetectedZones = new List<Rectangle>(); 
 
         static void Main(string[] args)
         {
@@ -29,9 +30,10 @@ namespace ConsoleApplication3
             zones[0] = new Rectangle(490, 250, 395, 470);
             detector.MotionZones = zones;           
 
-            for (int i = 0; i < 120; i++)
+            for (int i = 0; i < 126; i++)
             {
                 Bitmap videoFrame = reader.ReadVideoFrame();
+                var processedFrame = new Bitmap(videoFrame);
                 float current = 0;
 
                 // Process Frame
@@ -39,13 +41,21 @@ namespace ConsoleApplication3
                 blur.ApplyInPlace(videoFrame);
                 current = detector.ProcessFrame(videoFrame);
 
-                Graphics g = Graphics.FromImage(videoFrame);
+                Graphics g = Graphics.FromImage(processedFrame);
                 if (processor.ObjectsCount > 0)
                 {
+                    motionDetectedZones.AddRange(processor.ObjectRectangles);
                     DrawMotion(g, processor.ObjectRectangles);
                 }
 
-                videoFrame.Save(@"C:\Development\PluralsightAforgeAudition\video\" + i.ToString("D5") + ".png");
+
+                //Show last frame
+                if (i == 125)
+                {
+                    DrawMotion(g, motionDetectedZones);
+                }
+
+                processedFrame.Save(@"C:\Development\PluralsightAforgeAudition\video\" + i.ToString("D5") + ".png");
                 videoFrame.Dispose();
 
             }
@@ -75,7 +85,7 @@ namespace ConsoleApplication3
             return (motionDetector);
         }
 
-        public static void DrawMotion(Graphics g, Rectangle[] motionZones)
+        public static void DrawMotion(Graphics g, IEnumerable<Rectangle> motionZones)
         {
             Pen greenPen = new Pen(Color.LightGreen, 3);
 
