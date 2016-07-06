@@ -24,22 +24,12 @@ namespace ConsoleApplication3
             VideoFileReader reader = new VideoFileReader();
             // open video file
             reader.Open(@"C:\Development\PluralsightAforgeAudition\DiscThrow.mp4");
-            // check some of its attributes
-            Console.WriteLine("width:  " + reader.Width);
-            Console.WriteLine("height: " + reader.Height);
-            Console.WriteLine("fps:    " + reader.FrameRate);
-            Console.WriteLine("codec:  " + reader.CodecName);
-            // read 100 video frames out of it
-
-
-
 
             MotionDetector detector = GetDefaultMotionDetector();
             
-            int j = 0;
-            Rectangle[] zones = new Rectangle[2];
-            zones[0] = new Rectangle(0, 0, 1279, 400);
-            zones[1] = new Rectangle(520, 0, 210, 499);
+            Rectangle[] zones = new Rectangle[1];
+            zones[0] = new Rectangle(500, 250, 400, 470);
+
 
             detector.MotionZones = zones;
 
@@ -52,8 +42,7 @@ namespace ConsoleApplication3
                     GaussianBlur blur = new GaussianBlur(2, 2);
                     //blur.ApplyInPlace(videoFrame);
 
-                    current = detector.ProcessFrame(videoFrame);
-                    
+                    current = detector.ProcessFrame(videoFrame);                    
                    
         
                     //ColorFiltering filter = new ColorFiltering();
@@ -67,6 +56,8 @@ namespace ConsoleApplication3
 
 
                     Graphics g = Graphics.FromImage(videoFrame);
+                    Pen blackPen = new Pen(Color.Black, 3);
+                    g.DrawRectangle(blackPen, zones[0]);
                     videoFrame.Save(@"C:\Development\PluralsightAforgeAudition\Output\" + i.ToString("D5") + ".png");
 
 
