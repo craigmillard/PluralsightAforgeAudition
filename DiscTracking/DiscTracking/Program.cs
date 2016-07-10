@@ -15,48 +15,42 @@ namespace ConsoleApplication3
     {
         public static AForge.Vision.Motion.MotionDetector motionDetector = null;
         public static AForge.Vision.Motion.BlobCountingObjectsProcessing processor = null;
-        public static List<Rectangle> motionDetectedZones = new List<Rectangle>(); 
+        public static List<Rectangle> motionDetectedZones = new List<Rectangle>();
 
         static void Main(string[] args)
         {
-            // create instance of video reader
             VideoFileReader reader = new VideoFileReader();
-            // open video file
             reader.Open(@"C:\Development\PluralsightAforgeAudition\DiscThrow.mp4");
-
             MotionDetector detector = GetDefaultMotionDetector();
 
+            // Zone to look for motion in
             Rectangle[] zones = new Rectangle[1];
             zones[0] = new Rectangle(490, 250, 395, 470);
-            detector.MotionZones = zones;           
+            detector.MotionZones = zones;
 
+            // Looping through each frame in the video (At 30 fps it's about ~4 seconds)
             for (int i = 0; i < 126; i++)
             {
-                Bitmap videoFrame = reader.ReadVideoFrame();
-                var processedFrame = new Bitmap(videoFrame);
+                Bitmap processedFrame = reader.ReadVideoFrame();
+                var originalFrame = new Bitmap(processedFrame);
                 float current = 0;
 
-                // Process Frame
+                // Blur, then detect motion (helps elminate background "noise")
                 GaussianBlur blur = new GaussianBlur(3, 3);
-                blur.ApplyInPlace(videoFrame);
-                current = detector.ProcessFrame(videoFrame);
+                blur.ApplyInPlace(processedFrame);
+                current = detector.ProcessFrame(processedFrame);
 
-                Graphics g = Graphics.FromImage(processedFrame);
+                // Draw rectangles around detected motion
+                Graphics g = Graphics.FromImage(originalFrame);
                 if (processor.ObjectsCount > 0)
                 {
                     motionDetectedZones.AddRange(processor.ObjectRectangles);
                     DrawMotion(g, processor.ObjectRectangles);
                 }
 
-
-                //Show last frame
-                if (i == 125)
-                {
-                    DrawMotion(g, motionDetectedZones);
-                }
-
-                processedFrame.Save(@"C:\Development\PluralsightAforgeAudition\video\" + i.ToString("D5") + ".png");
-                videoFrame.Dispose();
+                // Save the processed frame as an image
+                originalFrame.Save(@"C:\Development\PluralsightAforgeAudition\video\" + i.ToString("D5") + ".png");
+                processedFrame.Dispose();
 
             }
 
@@ -92,7 +86,6 @@ namespace ConsoleApplication3
             foreach (var rect in motionZones)
             {
                 g.DrawRectangle(greenPen, rect);
-                //g.FillEllipse(greenPen.Brush, rect);
             }
         }
 
